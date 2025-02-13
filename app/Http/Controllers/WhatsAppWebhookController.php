@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CryptoService;
 use App\Services\MessageHandler;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
@@ -11,16 +12,17 @@ class WhatsAppWebhookController extends Controller
 {
     protected $whatsappService;
     protected $messageHandle;
+    protected $cryptoService;
 
     public function __construct()
     {
         $this->whatsappService = new WhatsAppService;
         $this->messageHandle = new MessageHandler;
+        $this->cryptoService = new CryptoService;
     }
 
     public function verifyWebhook(Request $request) 
     {
-        Log::info("Entro al metodo.");
         try {
             $verify_token = env('WEBHOOK_VERIFY_TOKEN');
             $mode = $request->query('hub_mode');
@@ -42,6 +44,8 @@ class WhatsAppWebhookController extends Controller
     public function handleWebhook(Request $request) //Punto de conexion para mensajes entrantes
     {
         $data = $request->all();
+        $privatePem = env('PRIVATE_KEY');
+        $this->cryptoService->decryptRequest($data, $privatePem, 'growconnect');
 
         $message = $data['entry'][0]['changes'][0]['value']['messages'][0] ?? null;
         $senderInfo = $data['entry'][0]['changes'][0]['value']['contacts'][0] ?? null;

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Facades\Log;
 
 class MessageHandler
 {
@@ -31,8 +31,10 @@ class MessageHandler
                 $this->handleMenuOption($message['from'], $icomingMessage);
             }
         } elseif ($message['type'] === 'interactive') {
-            $option = $message['interactive']['button_reply']['id'] ?? null;
-            $this->handleMenuOption($message['from'], $option);
+            Log::info('Mensaje Interactivo');
+            Log::info($message);
+            /* $option = $message['interactive']['button_reply']['id'] ?? null;
+            $this->handleMenuOption($message['from'], $option); */
         }
 
         $this->whatsappService->markMessageAsRead($message['id']);
